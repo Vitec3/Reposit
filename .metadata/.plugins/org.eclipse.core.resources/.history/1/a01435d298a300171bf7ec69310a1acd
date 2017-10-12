@@ -1,0 +1,148 @@
+package application;
+	
+import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.Group;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import HashDictionary.ClosedHashing;
+import HashDictionary.HashTable;
+import HashDictionary.OpenHashing;
+
+
+public class Main extends Application {
+	
+	private HashTable hashtable = null;
+	
+	int sizetable = 3;
+	
+	@Override
+	public void start(Stage primaryStage) {
+		try {
+			primaryStage.setTitle("HashDictionary");
+			primaryStage.setResizable(false);
+			Scene scene = new Scene(new Group(), 320, 360);
+			
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setHeaderText(null);
+			alert.setTitle("Message");
+			
+			TextArea texta = new TextArea();
+			texta.setStyle("-fx-pref-width: 300;");
+			
+			ComboBox<String> comb = new ComboBox<String>();
+			comb.getItems().addAll("Open hashing", "Closed hashing");
+			comb.setStyle("-fx-pref-width: 300;");
+			comb.setEditable(false);
+			comb.setOnAction((event) -> {
+				hashtable.HashArr.clear();
+				if (comb.getSelectionModel().getSelectedItem().equals("Open hashing")) {
+					texta.clear();
+					hashtable = new OpenHashing(sizetable);
+				}	
+				else {
+					if (comb.getSelectionModel().getSelectedItem().equals("Closed hashing")) {
+						texta.clear();
+						hashtable = new ClosedHashing(sizetable);
+					}
+				}
+			});
+			
+			TextField textf = new TextField();
+			textf.setStyle("-fx-pref-width: 300;");
+			
+			Label message = new Label();
+			
+			Button butadd = new Button("Add item");
+			
+			butadd.setOnAction((event) -> {
+				if (hashtable != null) {
+					if (!textf.getText().equals("")) {
+						if (hashtable.Find(textf.getText()).equals("Can`t find item!")) {
+							message.setText(hashtable.Add(textf.getText()));
+							String[] arr = hashtable.ViewTable();
+							texta.clear();
+							for (int i = 0; i < arr.length; i++)
+								texta.appendText(arr[i] + "\n");
+						}
+						else						
+							message.setText("Element there is in table!");
+					}
+					else
+						message.setText("Input word!");
+				}
+				else {
+					alert.setContentText("Choose way hashing!");
+					alert.showAndWait();
+				}				
+			});
+			
+			Button butfind = new Button("Find item");
+			
+			butfind.setOnAction((event) -> {
+				if (hashtable != null) {
+					message.setText(hashtable.Find(textf.getText()));
+					String[] arr = hashtable.ViewTable();
+					texta.clear();
+					for (int i = 0; i < arr.length; i++)
+						texta.appendText(arr[i] + "\n");
+				}
+				else {
+					alert.setContentText("Choose way hashing!");
+					alert.showAndWait();
+				}	
+			});
+			
+			Button butdel = new Button("Delete item");
+			
+			butdel.setOnAction((event) -> {
+				if (hashtable != null) {
+					message.setText(hashtable.Delete(textf.getText()));
+					String[] arr = hashtable.ViewTable();
+					texta.clear();
+					for (int i = 0; i < arr.length; i++)
+						texta.appendText(arr[i] + "\n");
+				}
+				else {
+					alert.setContentText("Choose way hashing!");
+					alert.showAndWait();
+				}	
+			});
+			
+			HBox hbox = new HBox();
+			hbox.setSpacing(8);
+			hbox.getChildren().addAll(butadd, butfind, butdel);
+						
+			VBox vbox = new VBox();
+			vbox.setPadding(new Insets(10));
+			vbox.setSpacing(8);
+			vbox.getChildren().addAll(new Label("Choose way hashing:"), comb, new Label("Input word:"), textf, texta, message, hbox);
+						
+			Group root = (Group)scene.getRoot();
+			root.getChildren().add(vbox);
+			
+			primaryStage.setScene(scene);
+			primaryStage.show();
+				
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		launch(args);
+	}
+}

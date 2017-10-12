@@ -1,0 +1,99 @@
+package HashDictionary;
+
+import java.util.Collections;
+
+public class OpenHashing extends HashTable {
+
+    public OpenHashing(int size_table) {
+        this.size_table = size_table;
+    }
+
+    @Override
+    public String Add(String value) {
+        long hash = HashCode(value);
+        if (hash <= size_table) {
+            Chain_List cl = new Chain_List();
+            if (HashArr.stream().filter(item -> item.key == hash).count() <= 0) {
+                cl.setElement(value);
+                HashArr.add(new Key_Value(hash, cl));
+            } else {
+                try {
+                    Key_Value key_v = HashArr.stream().filter(item -> item.key == hash).findFirst().get();
+                    cl = key_v.value_list.clone();
+                    key_v.value_list.setElement(value);
+                    key_v.value_list.setNext(cl);
+                } catch (CloneNotSupportedException e) {
+                    return "Cloning is impossible!";
+                }
+            }
+            return "The item '" + value + "' is added to the hash table.";
+        }
+        else
+            return "Item length is too long!";
+    }
+
+    @Override
+    public String Find(String string) {
+        long[] mas = new long[2];
+        try {
+            long hash = HashCode(string);
+            Key_Value key_v = HashArr.stream().filter(item -> item.key == hash).findFirst().get();
+            Chain_List cl = key_v.value_list;
+            int i = 0;
+            while (!cl.getElement().equals(string)) {
+                cl = cl.getNext();
+                i++;
+            }
+            mas[0] = hash;
+            mas[1] = i;
+            return "The item has a hash " + mas[0] + " and is at position " + mas[1];
+        }
+        catch (Exception e) {
+            return "Can`t find item!";
+        }
+    }
+
+    @Override
+     public String Delete(String string) {
+        try {
+            long hash = HashCode(string);
+            Key_Value key_v = HashArr.stream().filter(item -> item.key == hash).findFirst().get();
+            Chain_List cl = key_v.value_list;
+            if (cl.getNext() != null) {
+                while (!cl.getElement().equals(string)) {
+                    cl = cl.getNext();
+                }
+                cl.setNext(cl);
+            } else {
+                if (cl.getElement().equals(string))
+                    HashArr.remove(key_v);
+                else
+                    throw (new Exception());
+            }
+            return "Item '" + string + "' deleted.";
+        }
+        catch (Exception e) {
+            return "Can`t delete item!";
+        }
+    }
+    
+    @Override    
+    public String[] ViewTable() {
+    	str_array.clear();
+    	Collections.sort(HashArr);
+    	str_array.add("Key  |    Value");
+    	for (int i = 0; i < HashArr.size(); i++) {
+    		String list = "";
+    		Chain_List cl = HashArr.get(i).value_list;
+    		while (cl.getElement() != null) {
+    			list += cl.getElement() + " --> ";
+    			cl = cl.getNext();
+    			if (cl == null)
+    				break;
+    		}
+    		list += "null";
+    		str_array.add(HashArr.get(i).key + "    |    " + list);
+    	}
+    	return str_array.toArray(new String[str_array.size()]);
+    }
+}
